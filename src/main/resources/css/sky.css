@@ -36,7 +36,7 @@
     -fx-background-position: center center;
     -fx-min-width: 25;
     -fx-min-height: 25;
-    -fx-background-image: url("/images/clear_busket.png");
+    -fx-background-image: url("../images/clear_busket.png");
 }
 
 .text-field {

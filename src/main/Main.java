@@ -17,6 +17,9 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 public class Main extends Application {
     private static final String APP_NAME = "Email Sender";
@@ -34,13 +37,12 @@ public class Main extends Application {
         ImageView imageView = new ImageView();
         imageView.setFitHeight(300);
         imageView.setFitWidth(400);
-        File spalshImage = new File("res/images/splash image big.png");
-        imageView.setImage(new Image(spalshImage.toURI().toString()));
+        imageView.setImage(new Image(getClass().getResource("resources/images/splash_image_big.png").toURI().toURL().toString()));
         splashRoot.getChildren().add(imageView);
         Scene splashScene = new Scene(splashRoot, 400, 300);
         // main
-        File mainScreenFXML = new File("res/fxml/sample.fxml");
-        Parent root = FXMLLoader.load(mainScreenFXML.toURI().toURL());
+        URL resource = getClass().getResource("/sample.fxml");
+        Parent root = FXMLLoader.load(getClass().getResource("resources/fxml/sample.fxml"));
         Scene mainScene = new Scene(root, 1400, 800);
         // main Stage
         Stage mainStage = new Stage();
@@ -75,15 +77,19 @@ public class Main extends Application {
         primaryStage.initStyle(StageStyle.UNDECORATED);
 
 
-
         Timeline timeline = new Timeline(new KeyFrame(Duration.millis(2000), ev -> {
             primaryStage.hide();
             mainStage.show();
         }));
 
         Timeline timeline1 = new Timeline(new KeyFrame(Duration.millis(100), ev -> {
-            File spalshImageGif = new File("res/images/splash gif.gif");
-            imageView.setImage(new Image(spalshImageGif.toURI().toString()));
+            try {
+                imageView.setImage(new Image(getClass().getResource("resources/images/splash_gif.gif").toURI().toURL().toString()));
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
             timeline.play();
         }));
         timeline1.play();
