@@ -1,24 +1,19 @@
 package main;
 
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.util.Duration;
+import javafx.stage.WindowEvent;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.net.URL;
 
 public class Main extends Application {
@@ -31,25 +26,21 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        primaryStage.setTitle(APP_NAME);
-        // splash
-        Pane splashRoot = new Pane();
-        ImageView imageView = new ImageView();
-        imageView.setFitHeight(300);
-        imageView.setFitWidth(400);
-        imageView.setImage(new Image(getClass().getResource("resources/images/splash_image_big.png").toURI().toURL().toString()));
-        splashRoot.getChildren().add(imageView);
-        Scene splashScene = new Scene(splashRoot, 400, 300);
-        // main
-        URL resource = getClass().getResource("/sample.fxml");
         Parent root = FXMLLoader.load(getClass().getResource("resources/fxml/sample.fxml"));
         Scene mainScene = new Scene(root, 1400, 800);
         // main Stage
-        Stage mainStage = new Stage();
-        Main.primaryStage = mainStage;
-        mainStage.setTitle(APP_NAME);
-        mainStage.setScene(mainScene);
-        mainStage.initStyle(StageStyle.TRANSPARENT);
+        /*CLOSING*/
+        Platform.setImplicitExit(false);
+        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent event) {
+                primaryStage.hide();
+                event.consume();
+            }
+        });
+        /*CLOSING*/
+        primaryStage.setTitle(APP_NAME);
+        primaryStage.initStyle(StageStyle.TRANSPARENT);
         /**** DRAGGABLE ******/
         //grab your root here
         root.setOnMousePressed(new EventHandler<MouseEvent>() {
@@ -59,41 +50,58 @@ public class Main extends Application {
                 yOffset = event.getSceneY();
             }
         });
-
         //move around here
         root.setOnMouseDragged(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                mainStage.setX(event.getScreenX() - xOffset);
-                mainStage.setY(event.getScreenY() - yOffset);
+                primaryStage.setX(event.getScreenX() - xOffset);
+                primaryStage.setY(event.getScreenY() - yOffset);
             }
         });
         /**** DRAGGABLE ******/
-        mainStage.setOnHidden(event -> Platform.exit());
-        mainScene.getRoot().requestFocus();
-        mainStage.setScene(mainScene);
-        // set
-        primaryStage.setScene(splashScene);
-        primaryStage.initStyle(StageStyle.UNDECORATED);
+        primaryStage.setScene(mainScene);
+        Main.primaryStage = primaryStage;
+        javax.swing.SwingUtilities.invokeLater(this::setTrayIcon);
+    }
 
+    private void setTrayIcon() {
+        if (!SystemTray.isSupported()) {
+            return;
+        }
 
-        Timeline timeline = new Timeline(new KeyFrame(Duration.millis(2000), ev -> {
-            primaryStage.hide();
-            mainStage.show();
-        }));
-
-        Timeline timeline1 = new Timeline(new KeyFrame(Duration.millis(100), ev -> {
-            try {
-                imageView.setImage(new Image(getClass().getResource("resources/images/splash_gif.gif").toURI().toURL().toString()));
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
+        PopupMenu trayMenu = new PopupMenu();
+        MenuItem item = new MenuItem("Выйти");
+        item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
             }
-            timeline.play();
-        }));
-        timeline1.play();
-        primaryStage.show();
+        });
+        trayMenu.add(item);
+
+        URL imageURL = getClass().getResource("resources/images/tray.png");
+
+        java.awt.Image icon = Toolkit.getDefaultToolkit().getImage(imageURL);
+        TrayIcon trayIcon = new TrayIcon(icon, Main.APP_NAME, trayMenu);
+        trayIcon.setImageAutoSize(true);
+        trayIcon.addActionListener(this::onTryClicked);
+
+        SystemTray tray = SystemTray.getSystemTray();
+        try {
+            tray.add(trayIcon);
+        } catch (AWTException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void onTryClicked(ActionEvent actionEvent) {
+        Platform.runLater(this::startNewGui);
+    }
+
+    private void startNewGui() {
+        Main.primaryStage.show();
+        Main.primaryStage.toFront();
+
     }
 
 

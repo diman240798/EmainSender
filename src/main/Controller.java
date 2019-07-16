@@ -223,4 +223,8 @@ public class Controller implements Initializable {
         subjectText.setText("");
         bodyText.setText("");
     }
+
+    public void onExitClicked(ActionEvent actionEvent) {
+        Main.primaryStage.hide();
+    }
 }
