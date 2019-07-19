@@ -32,18 +32,15 @@ public class EmailService {
     }
 
     public void sendMail() throws IOException, MessagingException {
-        try {
+       /* try {
             sendEmailByProps(PropertiesEmailUtil.propertiesViaSSL(fromEmail, password, PortType.SSL_465));
         } catch (MessagingException ex) {
             try {
                 sendEmailByProps(PropertiesEmailUtil.propertiesViaSSL(fromEmail, password, PortType.SSL_587));
-            } catch (MessagingException e) {
+            } catch (MessagingException e) {*/
                 sendEmailByProps(PropertiesEmailUtil.propertiesViaTLS(fromEmail, password));
-            }
-        }
-
-
-
+//            }
+//        }
     }
 
     private void sendEmailByProps(Properties properties) throws IOException, MessagingException {

@@ -6,7 +6,8 @@ public class PropertiesEmailUtil {
 
     public static Properties propertiesViaTLS(String emailFrom, String password) {
         Properties props = new Properties();
-        String host = "smtp." + emailFrom.split("@")[1];
+//        String host = "smtp." + emailFrom.split("@")[1];
+        String host = "smtp.office365.com";
         props.put("mail.smtp.host", host);
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.port", "587");
@@ -22,7 +23,8 @@ public class PropertiesEmailUtil {
 
     private static Properties propertiesViaSSL(String emailFrom, String password, int port) {
         Properties props = new Properties();
-        String host = "smtp." + emailFrom.split("@")[1];
+//        String host = "smtp." + emailFrom.split("@")[1];
+        String host = "smtp.office365.com";
         props.put("mail.smtp.host", host);
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.port", String.valueOf(port));

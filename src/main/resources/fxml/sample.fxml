@@ -2,8 +2,10 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
@@ -19,17 +21,13 @@
                 <Label layoutX="20.0" layoutY="52.0" text="Ваш email:" />
                 <Label layoutX="20.0" layoutY="92.0" text="Логин:" />
                 <Label layoutX="20.0" layoutY="133.0" text="Пароль:" />
-                <Label layoutX="20.0" layoutY="173.0" text="Email адресата:" />
+                <Label layoutX="23.0" layoutY="272.0" text="Email адресата:" />
                 <TextField fx:id="emailFromText" layoutX="135.0" layoutY="50.0" prefHeight="30.0" prefWidth="202.0" promptText="EmailFrom:" />
                 <TextField fx:id="loginText" layoutX="135.0" layoutY="90.0" prefHeight="30.0" prefWidth="202.0" promptText="Login:" />
                 <PasswordField fx:id="passwordText" layoutX="135.0" layoutY="130.0" prefHeight="30.0" prefWidth="202.0" promptText="Passsword" />
                 <TextField fx:id="passwordVisibleText" layoutX="135.0" layoutY="130.0" prefHeight="30.0" prefWidth="202.0" promptText="Passsword" visible="false" />
-                <TextField fx:id="emailToText" layoutX="135.0" layoutY="170.0" prefHeight="30.0" prefWidth="202.0" promptText="EmailTo:" />
-                <Button fx:id="chooseFileButton" layoutX="35.0" layoutY="520.0" mnemonicParsing="false" onAction="#onChooseFileClicked" text="Добавить файл" />
-                <Button fx:id="chooseDirButton" layoutX="38.0" layoutY="460.0" mnemonicParsing="false" onAction="#onChooseDirClicked" prefHeight="34.0" prefWidth="258.0" text="Добавить файлы в каталоге" />
-                <Label layoutX="37.0" layoutY="409.0" prefHeight="27.0" prefWidth="118.0" text="Расширения:" />
-                <Label layoutX="49.0" layoutY="429.0" style="-fx-font-size: 8pt" text="(через запятую)" textAlignment="CENTER" />
-                <TextField fx:id="extensionsText" layoutX="144.0" layoutY="414.0" prefHeight="30.0" prefWidth="152.0" promptText="Extensions:" />
+                <TextField fx:id="emailToText" layoutX="135.0" layoutY="270.0" prefHeight="30.0" prefWidth="202.0" promptText="EmailTo:" />
+                <Button fx:id="chooseDirButton" layoutX="20.0" layoutY="222.0" mnemonicParsing="false" onAction="#onChooseDirClicked" prefHeight="34.0" prefWidth="360.0" text="Добавить каталог" />
                 <Label fx:id="incorrectEmailFromLabel" layoutX="160.0" layoutY="26.0" opacity="0" style="-fx-font-size: 9pt; -fx-text-fill: #ff1000; -fx-font-weight: bold" text="некорректный email" />
                 <Label fx:id="incorrectEmailToLabel" layoutX="160.0" layoutY="205.0" opacity="0" style="-fx-font-size: 9pt; -fx-text-fill: #ff1000; -fx-font-weight: bold" text="некорректный email" />
 
@@ -37,9 +35,15 @@
                 <Button layoutX="358.0" layoutY="49.0" mnemonicParsing="false" onAction="#onClearEmailFrom" styleClass="clearButton" />
                 <Button layoutX="358.0" layoutY="89.0" mnemonicParsing="false" onAction="#onClearLogin" styleClass="clearButton" />
                 <Button layoutX="358.0" layoutY="129.0" mnemonicParsing="false" onAction="#onClearPassword" styleClass="clearButton" />
-                <Button layoutX="358.0" layoutY="169.0" mnemonicParsing="false" onAction="#onClearEmailTo" styleClass="clearButton" />
-                <Button layoutX="312.0" layoutY="411.0" mnemonicParsing="false" onAction="#onClearExtensions" styleClass="clearButton" />
+                <Button layoutX="337.0" layoutY="269.0" mnemonicParsing="false" onAction="#onClearEmailTo" styleClass="clearButton" />
                 <CheckBox fx:id="showHidePassFLG" layoutX="106.0" layoutY="133.0" mnemonicParsing="false" onAction="#onShowHidePasswordClicked" />
+            <Button layoutX="368.0" layoutY="269.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="24.0" styleClass="addButton" />
+            <TableView layoutX="21.0" layoutY="325.0" prefHeight="396.0" prefWidth="368.0" styleClass="table">
+              <columns>
+                <TableColumn prefWidth="75.0" text="C1" />
+                <TableColumn prefWidth="75.0" text="C2" />
+              </columns>
+            </TableView>
 
             </children>
         </Pane>
@@ -92,7 +96,8 @@
                     </image>
                 </ImageView>
                 <Label layoutX="65.0" layoutY="18.0" style="-fx-font-weight: bold;" styleClass="emailSenderLabel" text="Email Sender" />
-            <Button onAction="#onExitClicked" layoutX="1364.0" layoutY="2.0" mnemonicParsing="false" styleClass=".exitButton" text="Exit" />
+            <Button layoutX="1364.0" layoutY="2.0" mnemonicParsing="false" onAction="#onExitClicked" styleClass=".exitButton" text="Exit" />
+            <ChoiceBox layoutX="400.0" layoutY="18.0" prefHeight="37.0" prefWidth="597.0" />
             </children>
         </Pane>
     </top>
