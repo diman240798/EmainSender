@@ -2,6 +2,7 @@ package com.nanicky.emailsender.model;
 
 import javax.persistence.*;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity(name = "AppData")
@@ -13,7 +14,7 @@ public class AppData {
     @Column(name = "id", unique = true, nullable = false)
     private String id;
 
-    @OneToMany(targetEntity=DirectoryStorage.class, fetch=FetchType.EAGER)
+    @OneToMany(targetEntity=DirectoryStorage.class, fetch=FetchType.EAGER, cascade=CascadeType.ALL)
     private List<DirectoryStorage> dirs;
     @Column(name = "sendingTime")
     private LocalTime sendingTime;
@@ -24,6 +25,7 @@ public class AppData {
     }
 
     public AppData() {
+        dirs = new ArrayList<>();
     }
 
     public String getId() {

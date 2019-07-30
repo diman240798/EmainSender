@@ -3,11 +3,12 @@ package com.nanicky.emailsender.main;
 import com.nanicky.emailsender.Main;
 import com.nanicky.emailsender.main.handler.EmailHandler;
 import com.nanicky.emailsender.main.handler.UIemailHandler;
-import com.nanicky.emailsender.model.TableEmailModel;
-import com.nanicky.emailsender.model.TableFileModel;
+import com.nanicky.emailsender.model.*;
 import com.nanicky.emailsender.service.AppDataService;
+import com.nanicky.emailsender.service.DirStorageService;
+import com.nanicky.emailsender.service.UserDataService;
 import com.nanicky.emailsender.util.EmailValidator;
-import com.nanicky.emailsender.util.TableViewUtil;
+import com.nanicky.emailsender.util.UtilDialog;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -18,25 +19,26 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import java.io.File;
 import java.net.URL;
-import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Controller("mainController")
 public class MainController implements Initializable {
     @Autowired
     private AppDataService appDataService;
+    @Autowired
+    private UserDataService userDataService;
+    @Autowired
+    private DirStorageService dirsService;
 
 
     @FXML
@@ -51,8 +53,6 @@ public class MainController implements Initializable {
     PasswordField passwordText;
     @FXML
     TextField passwordVisibleText;
-    @FXML
-    TextField emailToText;
     @FXML
     Button chooseFileButton;
     @FXML
@@ -73,6 +73,10 @@ public class MainController implements Initializable {
     Label errorLabel;
     @FXML
     CheckBox showHidePassFLG;
+    @FXML
+    TextField emailToText;
+    @FXML
+    ChoiceBox<DirectoryStorage> dirChoiceBox;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -106,9 +110,24 @@ public class MainController implements Initializable {
 
         filesTableView.getColumns().addAll(nameColumn, pathColumn);
 
+        TableColumn<TableEmailModel, String> emailColumn = new TableColumn<>("Email");
+        emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
+        emailColumn.setPrefWidth(366);
+        emailsTableView.getColumns().add(emailColumn);
+
+        dirChoiceBox.setOnAction(event -> {
+            DirectoryStorage value = dirChoiceBox.getValue();
+            setUI(value);
+        });
+
+        AppData appData = appDataService.get();
+        if (appData != null) {
+            List<DirectoryStorage> dirs = appData.getDirs();
+            dirChoiceBox.getItems().addAll(dirs);
+        }
     }
 
-    public void onChooseFileClicked(ActionEvent actionEvent) {
+    /*public void onChooseFileClicked(ActionEvent actionEvent) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(Paths.get("").toAbsolutePath().toFile());
         Stage stage = new Stage();
@@ -124,33 +143,51 @@ public class MainController implements Initializable {
             filesTableView.setItems(tableItems);
         }
         chooseFileButton.setDisable(false);
-    }
+    }*/
 
     public void onChooseDirClicked(ActionEvent actionEvent) {
-        DirectoryChooser dirChooser = new DirectoryChooser();
-        dirChooser.setInitialDirectory(Paths.get("").toAbsolutePath().toFile());
-
-        Stage stage = new Stage();
-        stage.initOwner(Main.primaryStage);
-        stage.initModality(Modality.APPLICATION_MODAL);
-        stage.setAlwaysOnTop(true);
-
         chooseDirButton.setDisable(true);
-        File dir = dirChooser.showDialog(stage);
+
+        File dir = UtilDialog.createDirChooserDialog();
+
         if (dir != null) {
-            List<File> filesInChosenDir = Arrays.asList(dir.listFiles(File::isFile));
-            filesInChosenDir.forEach(file -> {
-                ObservableList<TableFileModel> tableItems = filesTableView.getItems();
-                tableItems.add(new TableFileModel(file.getName(), file.getPath()));
-                filesTableView.setItems(tableItems);
-            });
+            DirectoryStorage directoryStorage = new DirectoryStorage(dir.getName(), dir.getPath());
+            AppData appData = appDataService.get();
+            if (appData == null) appData = new AppData();
+            List<DirectoryStorage> dirs = appData.getDirs();
+            dirs.add(directoryStorage);
+            appDataService.save(appData);
+
+            dirChoiceBox.getItems().add(directoryStorage);
+            dirChoiceBox.setValue(directoryStorage);
+
+            setUI(directoryStorage);
         }
         chooseDirButton.setDisable(false);
     }
 
+    private void updateFilesTable(File dir) {
+        List<File> filesInChosenDir = Arrays.asList(dir.listFiles(File::isFile));
+        updateFilesTable(filesInChosenDir);
+    }
+
+    private void updateFilesTable(List<File> filesInChosenDir) {
+        ObservableList<TableFileModel> tableItems = filesTableView.getItems();
+        tableItems.clear();
+        filesInChosenDir.forEach(file -> {
+            tableItems.add(new TableFileModel(file.getName(), file.getPath()));
+        });
+        filesTableView.setItems(tableItems);
+    }
+
     public void onKeyPressed(KeyEvent keyEvent) {
         if (keyEvent.getCode() == KeyCode.DELETE) {
-            filesTableView.getItems().removeAll(filesTableView.getSelectionModel().getSelectedItem());
+            TableEmailModel selectedItem = emailsTableView.getSelectionModel().getSelectedItem();
+            DirectoryStorage curentDir = dirChoiceBox.getValue();
+            List<String> emails = curentDir.getEmails();
+            emails.remove(selectedItem.getEmail());
+            dirsService.save(curentDir);
+            setUI(curentDir);
         }
     }
 
@@ -158,17 +195,39 @@ public class MainController implements Initializable {
         UIemailHandler.onStartSending(sendMailButton, errorLabel, sendingPane);
         new Thread(() -> {
             AtomicReference<String> errorText = new AtomicReference<>("");
-            try {
-                String emailFrom = emailFromText.getText();
-                String login = loginText.getText();
-                String password = showHidePassFLG.isSelected() ? passwordVisibleText.getText() : passwordText.getText();
-                String emailTo = emailToText.getText();
-                String subject = subjectText.getText();
-                String body = bodyText.getText();
-                List<File> files = TableViewUtil.getFilesFromTable(filesTableView);
 
-                EmailHandler emailHandler = new EmailHandler(emailFrom, login, password, emailTo, subject, body, files);
-                emailHandler.sendMail();
+            try {
+
+                AppData appData = appDataService.get();
+                if (appData == null) {
+                    throw new RuntimeException("No data was added yet");
+                }
+
+                List<DirectoryStorage> appDataDirs = appData.getDirs();
+                UserData userData = userDataService.get();
+                if (userData == null) {
+                    throw new RuntimeException("No credentials were added yet");
+                }
+
+
+                for (int i = 0; i < appDataDirs.size(); i++) {
+                    DirectoryStorage directoryStorage = appDataDirs.get(i);
+                    // updateUi
+                    Platform.runLater(() -> setUI(directoryStorage));
+
+                    String subject = directoryStorage.getSubject();
+                    String body = directoryStorage.getBody();
+                    List<File> files = Arrays.asList(new File(directoryStorage.getPath()).listFiles(File::isFile));
+
+                    List<String> emails = directoryStorage.getEmails();
+                    for (int j = 0; j < emails.size(); j++) {
+                        String email = emails.get(j);
+                        EmailHandler emailHandler = new EmailHandler(userData, email, subject, body, files);
+                        emailHandler.sendMail();
+                    }
+                }
+
+
             } catch (Exception e) {
                 errorText.set(e.getMessage());
                 e.printStackTrace();
@@ -178,6 +237,27 @@ public class MainController implements Initializable {
                 });
             }
         }).start();
+    }
+
+    private void setUI(DirectoryStorage directoryStorage) {
+        updateFilesTable(new File(directoryStorage.getPath()));
+        updateEmailsTable(directoryStorage.getEmails());
+    }
+
+    private void updateEmailsTable(List<String> emails) {
+        List<TableEmailModel> emailModels = emails.stream().map(TableEmailModel::new).collect(Collectors.toList());
+        ObservableList<TableEmailModel> items = emailsTableView.getItems();
+        items.clear();
+        items.addAll(emailModels);
+    }
+
+    public void onSaveUserDataClicked(ActionEvent actionEvent) {
+        String emailFrom = emailFromText.getText();
+        String password = showHidePassFLG.isSelected() ? passwordVisibleText.getText() : passwordText.getText();
+        UserData userData = userDataService.get();
+        userData.setEmail(emailFrom);
+        userData.setPassword(password);
+        userDataService.save(userData);
     }
 
     public void onClearEmailFrom(ActionEvent actionEvent) {

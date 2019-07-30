@@ -11,9 +11,15 @@ import java.util.List;
 public class AppDataService {
 
     @Autowired
-    AppDataRepo repo;
+    private AppDataRepo repo;
 
-    List<AppData> getAll() {
-        return repo.findAll();
+    public AppData get() {
+        List<AppData> all = repo.findAll();
+        if (all.isEmpty()) return null;
+        return all.get(0);
+    }
+
+    public AppData save(AppData appData) {
+        return repo.save(appData);
     }
 }

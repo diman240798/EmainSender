@@ -18,8 +18,12 @@ public class DirectoryStorage {
     @Column(name = "path")
     private String path;
     @Column(name = "emails")
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> emails;
+    @Column(name = "body")
+    private String body;
+    @Column(name = "subject")
+    private String subject;
 
     public DirectoryStorage(String name, String path, List<String> emails) {
         this.name = name;
@@ -54,5 +58,26 @@ public class DirectoryStorage {
 
     public List<String> getEmails() {
         return emails;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

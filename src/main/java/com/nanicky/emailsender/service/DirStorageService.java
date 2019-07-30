@@ -16,4 +16,8 @@ public class DirStorageService {
         return repo.findAll();
     }
 
+    public DirectoryStorage save(DirectoryStorage dir) {
+        return repo.save(dir);
+    }
+
 }
