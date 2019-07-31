@@ -17,12 +17,7 @@ public class AppData {
     @OneToMany(targetEntity=DirectoryStorage.class, fetch=FetchType.EAGER, cascade=CascadeType.ALL)
     private List<DirectoryStorage> dirs;
     @Column(name = "sendingTime")
-    private LocalTime sendingTime;
-
-    public AppData(List<DirectoryStorage> dirs, LocalTime sendingTime) {
-        this.dirs = dirs;
-        this.sendingTime = sendingTime;
-    }
+    private String sendingTime;
 
     public AppData() {
         dirs = new ArrayList<>();
@@ -44,11 +39,11 @@ public class AppData {
         this.dirs = dirs;
     }
 
-    public LocalTime getSendingTime() {
+    public String getSendingTime() {
         return sendingTime;
     }
 
-    public void setSendingTime(LocalTime sendingTime) {
+    public void setSendingTime(String sendingTime) {
         this.sendingTime = sendingTime;
     }
 }

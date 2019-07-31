@@ -73,6 +73,7 @@
             <Button fx:id="setTimeButton" disable="true" layoutX="201.0" layoutY="399.0" mnemonicParsing="false" onAction="#onSetTime" prefHeight="32.0" prefWidth="173.0" text="Установить время" />
             <TextField fx:id="timeText" layoutX="25.0" layoutY="400.0" prefHeight="30.0" prefWidth="170.0" promptText="19:32" />
             <Label fx:id="incorrectTimeLabel" layoutX="43.0" layoutY="438.0" opacity="0.0" style="-fx-text-fill: #ff0000; -fx-font-size: 9pt; -fx-font-weight: bold;" text="некорректный формат" />
+            <Label fx:id="timeElapsedLabel" layoutX="274.0" layoutY="455.0" style="-fx-text-fill: #006fff;" />
                 <!--error handling-->
             </children>
         </Pane>
