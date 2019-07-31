@@ -4,10 +4,12 @@ import com.nanicky.emailsender.Main;
 import com.nanicky.emailsender.main.handler.EmailHandler;
 import com.nanicky.emailsender.main.handler.UIemailHandler;
 import com.nanicky.emailsender.model.*;
+import com.nanicky.emailsender.scheduler.Scheduler;
 import com.nanicky.emailsender.service.AppDataService;
 import com.nanicky.emailsender.service.DirStorageService;
 import com.nanicky.emailsender.service.UserDataService;
 import com.nanicky.emailsender.util.EmailValidator;
+import com.nanicky.emailsender.util.TimeValidator;
 import com.nanicky.emailsender.util.UtilDialog;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -19,6 +21,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
+import org.omg.CORBA.TRANSACTION_MODE;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -77,6 +80,13 @@ public class MainController implements Initializable {
     TextField emailToText;
     @FXML
     ChoiceBox<DirectoryStorage> dirChoiceBox;
+    @FXML
+    TextField timeText;
+    @FXML
+    Label incorrectTimeLabel;
+    @FXML
+    Button setTimeButton;
+    private Scheduler scheduler;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -94,8 +104,10 @@ public class MainController implements Initializable {
             String email = emailToText.getText();
             if (EmailValidator.validate(email)) {
                 incorrectEmailToLabel.setOpacity(0);
+                setTimeButton.setDisable(false);
             } else {
                 incorrectEmailToLabel.setOpacity(1);
+                setTimeButton.setDisable(true);
             }
         });
 
@@ -125,6 +137,24 @@ public class MainController implements Initializable {
             List<DirectoryStorage> dirs = appData.getDirs();
             dirChoiceBox.getItems().addAll(dirs);
         }
+
+        UserData userData = userDataService.get();
+        if (userData != null) {
+            emailFromText.setText(userData.getEmail());
+            loginText.setText(userData.getEmail().split("@")[0]);
+            passwordText.setText(userData.getPassword());
+        }
+
+        timeText.setOnKeyTyped(event -> {
+            String time = timeText.getText() + event.getCharacter();
+            boolean formatIsValid = TimeValidator.validate(time);
+            if (formatIsValid) {
+                incorrectTimeLabel.setOpacity(0);
+
+            } else {
+                incorrectTimeLabel.setOpacity(1);
+            }
+        });
     }
 
     /*public void onChooseFileClicked(ActionEvent actionEvent) {
@@ -166,6 +196,13 @@ public class MainController implements Initializable {
         chooseDirButton.setDisable(false);
     }
 
+    public void onAddEmail(ActionEvent event) {
+        String email = emailToText.getText();
+        DirectoryStorage dir = dirChoiceBox.getValue();
+        dir.getEmails().add(email);
+        dirsService.save(dir);
+    }
+
     private void updateFilesTable(File dir) {
         List<File> filesInChosenDir = Arrays.asList(dir.listFiles(File::isFile));
         updateFilesTable(filesInChosenDir);
@@ -192,6 +229,10 @@ public class MainController implements Initializable {
     }
 
     public void sendMail(ActionEvent actionEvent) {
+        sendMail();
+    }
+
+    private void sendMail() {
         UIemailHandler.onStartSending(sendMailButton, errorLabel, sendingPane);
         new Thread(() -> {
             AtomicReference<String> errorText = new AtomicReference<>("");
@@ -237,6 +278,10 @@ public class MainController implements Initializable {
                 });
             }
         }).start();
+    }
+
+    public void onSetTime(ActionEvent event) {
+        scheduler.shedule(timeText.getText());
     }
 
     private void setUI(DirectoryStorage directoryStorage) {
