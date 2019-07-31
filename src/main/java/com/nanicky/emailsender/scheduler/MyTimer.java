@@ -13,9 +13,11 @@ public class MyTimer {
     private Timer timer = new Timer();
     private int diffMinutes;
     private final Label timeElapsedLabel;
+    private final Runnable callback;
 
-    public MyTimer(Label timeElapsedLabel) {
+    public MyTimer(Label timeElapsedLabel, Runnable callback) {
         this.timeElapsedLabel = timeElapsedLabel;
+        this.callback = callback;
     }
 
     public void setTimer(int diffMin) {
@@ -25,13 +27,17 @@ public class MyTimer {
             public void run() {
                 if (diffMinutes > 0) {
                     int hours = diffMinutes / 60;
-                    int minutes =  diffMinutes % 60;
+                    int minutes = diffMinutes % 60;
                     String timeLeft = LocalTime.of(hours, minutes).toString();
                     Platform.runLater(() -> timeElapsedLabel.setText(timeLeft));
                     System.out.println("Minutes Left:" + diffMinutes);
                     diffMinutes--;
-                } else
+                } else {
+                    System.out.println("Cancel Timer");
                     timer.cancel();
+                    System.out.println("Running Callback");
+                    callback.run();
+                }
             }
         };
         //start
@@ -41,5 +47,9 @@ public class MyTimer {
     public void stop() {
         timer.cancel();
         timeElapsedLabel.setText("");
+    }
+
+    public boolean isRunning() {
+        return diffMinutes > 0;
     }
 }

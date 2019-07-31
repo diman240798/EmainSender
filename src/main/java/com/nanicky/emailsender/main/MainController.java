@@ -5,7 +5,7 @@ import com.nanicky.emailsender.main.handler.EmailHandler;
 import com.nanicky.emailsender.main.handler.UIemailHandler;
 import com.nanicky.emailsender.model.*;
 import com.nanicky.emailsender.scheduler.MyTimer;
-import com.nanicky.emailsender.scheduler.Scheduler;
+import com.nanicky.emailsender.scheduler.TimeUtil;
 import com.nanicky.emailsender.service.AppDataService;
 import com.nanicky.emailsender.service.DirStorageService;
 import com.nanicky.emailsender.service.UserDataService;
@@ -17,11 +17,8 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -31,8 +28,9 @@ import org.springframework.stereotype.Controller;
 
 import java.io.File;
 import java.net.URL;
-import java.util.*;
+import java.util.Arrays;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -90,16 +88,14 @@ public class MainController implements Initializable {
     Button setTimeButton;
     @FXML
     private Label timeElapsedLabel;
+    @FXML
+    private Button stopButton;
 
-
-    private Scheduler scheduler;
     private MyTimer timer;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        scheduler = new Scheduler(this::sendMail);
-        timer = new MyTimer(timeElapsedLabel);
-
+        timer = new MyTimer(timeElapsedLabel, this::sendMail);
         emailFromText.setOnKeyTyped(event -> {
             String email = emailFromText.getText();
             if (EmailValidator.validate(email)) {
@@ -159,6 +155,10 @@ public class MainController implements Initializable {
         }
 
         timeText.setOnKeyTyped(event -> {
+            if (timer.isRunning()) {
+                event.consume();
+                return;
+            }
             String time = timeText.getText() + event.getCharacter();
             boolean formatIsValid = TimeValidator.validate(time);
             if (formatIsValid) {
@@ -294,6 +294,23 @@ public class MainController implements Initializable {
         }).start();
     }
 
+    public void onStopScheduling(ActionEvent event) {
+        onStopScheduling();
+    }
+
+    private void onStopScheduling() {
+        timer.stop();
+        timeText.setText("");
+        AppData appData = appDataService.get();
+        if (appData != null) {
+            appData.setSendingTime(null);
+            appDataService.save(appData);
+        }
+        stopButton.setDisable(true);
+
+
+    }
+
     public void onSetTime(ActionEvent event) {
         setTimeButton.setDisable(true);
         String timeStr = timeText.getText();
@@ -301,8 +318,9 @@ public class MainController implements Initializable {
         if (appData == null) appData = new AppData();
         appData.setSendingTime(timeStr);
         appDataService.save(appData);
-        int diffMinutes = (int) scheduler.shedule(timeStr);
+        int diffMinutes = (int) TimeUtil.getDiffMinutes(timeStr);
         timer.setTimer(diffMinutes);
+        stopButton.setDisable(false);
     }
 
     private void setUI(DirectoryStorage directoryStorage) {
