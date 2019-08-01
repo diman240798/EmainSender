@@ -1,14 +1,11 @@
 package com.nanicky.emailsender.model;
 
-import org.hibernate.annotations.NotFound;
-import org.hibernate.annotations.NotFoundAction;
-
 import javax.persistence.*;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity(name = "AppData")
+@Table(name = "app_data")
 public class AppData {
 
     @Id
@@ -17,10 +14,14 @@ public class AppData {
     @Column(name = "id", unique = true, nullable = false)
     private String id;
 
-    @OneToMany(targetEntity=DirectoryStorage.class, fetch=FetchType.EAGER, cascade=CascadeType.ALL)
-    @NotFound(action = NotFoundAction.IGNORE)
-    @JoinColumn(name = "appData")
+    @OneToMany(
+            mappedBy = "appData",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.EAGER
+    )
     private List<DirectoryStorage> dirs;
+
     @Column(name = "sendingTime", nullable = false)
     private String sendingTime = "";
 

@@ -11,7 +11,7 @@ import java.util.List;
 public class AppDataService {
 
     @Autowired
-    private AppDataRepo repo;
+    public AppDataRepo repo;
 
     public AppData get() {
         List<AppData> all = repo.findAll();
@@ -20,7 +20,6 @@ public class AppDataService {
     }
 
     public AppData save(AppData appData) {
-        repo.deleteAll();
         return repo.save(appData);
     }
 }

@@ -217,6 +217,7 @@ public class MainController implements Initializable {
             if (appData == null) appData = new AppData();
             List<DirectoryStorage> dirs = appData.getDirs();
             dirs.add(directoryStorage);
+            directoryStorage.setAppData(appData);
             appDataService.save(appData);
 
             dirChoiceBox.getItems().add(directoryStorage);
@@ -388,7 +389,6 @@ public class MainController implements Initializable {
         if (dir == null) return;
         AppData appData = appDataService.get();
         appData.getDirs().remove(dir);
-        dirsService.delete(dir);
         appData = appDataService.save(appData);
         ObservableList<DirectoryStorage> items = dirChoiceBox.getItems();
         items.clear();

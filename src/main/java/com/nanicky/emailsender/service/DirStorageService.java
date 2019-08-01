@@ -19,8 +19,4 @@ public class DirStorageService {
     public DirectoryStorage save(DirectoryStorage dir) {
         return repo.save(dir);
     }
-
-    public void delete(DirectoryStorage dir) {
-        repo.delete(dir);
-    }
 }

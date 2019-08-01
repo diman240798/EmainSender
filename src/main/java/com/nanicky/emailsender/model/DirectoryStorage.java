@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @Entity(name = "DirectoryStorage")
+@Table(name = "directory_storage")
 public class DirectoryStorage {
 
     @Id
@@ -14,6 +15,10 @@ public class DirectoryStorage {
     @Column(name = "id", unique = true, nullable = false)
     private String id;
 
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "app_data_id")
+    private AppData appData;
 
     @Column(name = "name")
     private String name;
@@ -81,6 +86,26 @@ public class DirectoryStorage {
     @Override
     public String toString() {
         return name;
+    }
+
+    public AppData getAppData() {
+        return appData;
+    }
+
+    public void setAppData(AppData appData) {
+        this.appData = appData;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public void setEmails(Set<String> emails) {
+        this.emails = emails;
     }
 
     @Override
