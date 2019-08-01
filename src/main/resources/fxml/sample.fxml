@@ -99,6 +99,7 @@
                 <Label layoutX="65.0" layoutY="18.0" style="-fx-font-weight: bold;" styleClass="emailSenderLabel" text="Email Sender" />
             <Button layoutX="1370.0" mnemonicParsing="false" onAction="#onExitClicked" styleClass="exitButton" />
             <ChoiceBox fx:id="dirChoiceBox" layoutX="400.0" layoutY="18.0" prefHeight="37.0" prefWidth="597.0" />
+            <Button layoutX="1008.0" layoutY="21.0" mnemonicParsing="false" onAction="#onDeleteDir" styleClass="clearButton" />
             </children>
         </Pane>
     </top>

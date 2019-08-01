@@ -5,6 +5,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -37,8 +38,8 @@ public class ReportHandler {
 
         reportTableView.getColumns().addAll(emailToColumn, statusColumn, filesColumn, errorColumn);
 
-        Pane pane = new Pane();
-        pane.getChildren().add(reportTableView);
+        BorderPane pane = new BorderPane();
+        pane.setCenter(reportTableView);
         Scene scene = new Scene(pane, width, height);
         scene.getStylesheets().add("css/sky.css");
         Stage stage = new Stage(StageStyle.UTILITY);

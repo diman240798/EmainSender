@@ -20,6 +20,7 @@ public class AppDataService {
     }
 
     public AppData save(AppData appData) {
+        repo.deleteAll();
         return repo.save(appData);
     }
 }

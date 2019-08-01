@@ -1,8 +1,9 @@
 package com.nanicky.emailsender.model;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 @Entity(name = "DirectoryStorage")
 public class DirectoryStorage {
@@ -13,19 +14,20 @@ public class DirectoryStorage {
     @Column(name = "id", unique = true, nullable = false)
     private String id;
 
+
     @Column(name = "name")
     private String name;
     @Column(name = "path")
     private String path;
     @Column(name = "emails")
     @ElementCollection(fetch = FetchType.EAGER)
-    private List<String> emails;
+    private Set<String> emails;
     @Column(name = "body", nullable = false)
     private String body = "";
     @Column(name = "subject", nullable = false)
     private String subject = "";
 
-    public DirectoryStorage(String name, String path, List<String> emails) {
+    public DirectoryStorage(String name, String path, Set<String> emails) {
         this.name = name;
         this.path = path;
         this.emails = emails;
@@ -34,7 +36,7 @@ public class DirectoryStorage {
     public DirectoryStorage(String name, String path) {
         this.name = name;
         this.path = path;
-        emails = new ArrayList<>();
+        emails = new HashSet<>();
     }
 
     public DirectoryStorage() {
@@ -56,7 +58,7 @@ public class DirectoryStorage {
         return path;
     }
 
-    public List<String> getEmails() {
+    public Set<String> getEmails() {
         return emails;
     }
 
@@ -79,5 +81,29 @@ public class DirectoryStorage {
     @Override
     public String toString() {
         return name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DirectoryStorage that = (DirectoryStorage) o;
+
+        if (!Objects.equals(name, that.name)) return false;
+        if (!Objects.equals(path, that.path)) return false;
+        if (!Objects.equals(emails, that.emails)) return false;
+        if (!Objects.equals(body, that.body)) return false;
+        return Objects.equals(subject, that.subject);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + (path != null ? path.hashCode() : 0);
+        result = 31 * result + (emails != null ? emails.hashCode() : 0);
+        result = 31 * result + (body != null ? body.hashCode() : 0);
+        result = 31 * result + (subject != null ? subject.hashCode() : 0);
+        return result;
     }
 }

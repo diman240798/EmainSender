@@ -14,29 +14,24 @@ import com.nanicky.emailsender.service.UserDataService;
 import com.nanicky.emailsender.util.EmailValidator;
 import com.nanicky.emailsender.util.TimeValidator;
 import com.nanicky.emailsender.util.UtilDialog;
+import com.nanicky.emailsender.util.UtilStackTrace;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -110,7 +105,7 @@ public class MainController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         timer = new MyTimer(timeElapsedLabel, this::sendMail, timeDescLabel);
         emailFromText.setOnKeyTyped(event -> {
-            String email = emailFromText.getText();
+            String email = emailFromText.getText() + event.getCharacter();
             if (EmailValidator.validate(email)) {
                 incorrectEmailFromLabel.setOpacity(0);
             } else {
@@ -147,9 +142,10 @@ public class MainController implements Initializable {
         emailsTableView.getColumns().add(emailColumn);
 
         dirChoiceBox.setOnAction(event -> {
-            DirectoryStorage value = dirChoiceBox.getValue();
+            DirectoryStorage dir = dirChoiceBox.getValue();
+            if (dir == null) return;
             emailToText.setDisable(false);
-            setUI(value);
+            setUI(dir);
         });
 
         AppData appData = appDataService.get();
@@ -234,7 +230,9 @@ public class MainController implements Initializable {
     public void onAddEmail(ActionEvent event) {
         String email = emailToText.getText();
         DirectoryStorage dir = dirChoiceBox.getValue();
-        dir.getEmails().add(email);
+        if (dir == null) return;
+        Set<String> emails = dir.getEmails();
+        emails.add(email);
         dirsService.save(dir);
         emailToText.setText("");
         addEmailButton.setDisable(true);
@@ -258,8 +256,9 @@ public class MainController implements Initializable {
     public void onKeyPressed(KeyEvent keyEvent) {
         if (keyEvent.getCode() == KeyCode.DELETE) {
             TableEmailModel selectedItem = emailsTableView.getSelectionModel().getSelectedItem();
+            if (selectedItem == null) return;
             DirectoryStorage curentDir = dirChoiceBox.getValue();
-            List<String> emails = curentDir.getEmails();
+            Set<String> emails = curentDir.getEmails();
             emails.remove(selectedItem.getEmail());
             dirsService.save(curentDir);
             setUI(curentDir);
@@ -299,23 +298,26 @@ public class MainController implements Initializable {
                     String body = directoryStorage.getBody();
                     List<File> files = Arrays.asList(new File(directoryStorage.getPath()).listFiles(File::isFile));
 
-                    List<String> emails = directoryStorage.getEmails();
-                    for (int j = 0; j < emails.size(); j++) {
-                        String emailTo = emails.get(j);
+                    Set<String> emails = directoryStorage.getEmails();
+                    Iterator<String> iterator = emails.iterator();
+                    while (iterator.hasNext()) {
+                        String emailTo = iterator.next();
                         try {
                             EmailHandler emailHandler = new EmailHandler(userData, emailTo, subject, body, files);
                             emailHandler.sendMail();
                             reports.add(new SendingReport(emailTo, files));
                         } catch (Exception e) {
-                            reports.add(new SendingReport(emailTo, files, e.getStackTrace().toString()));
+                            reports.add(new SendingReport(emailTo, files, UtilStackTrace.getStackTrace(e)));
                         }
                     }
                 }
 
 
             } catch (Exception e) {
+                System.out.println("ERROR");
                 errorText.set(e.getMessage());
                 e.printStackTrace();
+                System.out.println("ERROR");
             } finally {
                 reportService.save(reports);
                 Platform.runLater(() -> {
@@ -344,8 +346,9 @@ public class MainController implements Initializable {
 
     public void onSetTime(ActionEvent event) {
         AppData appData = appDataService.get();
-        if (appData == null)
+        if (appData == null || appData.getSendingTime() == null || appData.getSendingTime().isEmpty())
             return;
+
 
         setTimeButton.setDisable(true);
         String timeStr = timeText.getText();
@@ -368,10 +371,11 @@ public class MainController implements Initializable {
     }
 
     public void onSaveBodySubject(ActionEvent event) {
-        DirectoryStorage value = dirChoiceBox.getValue();
-        value.setBody(bodyText.getText());
-        value.setSubject(subjectText.getText());
-        dirsService.save(value);
+        DirectoryStorage dir = dirChoiceBox.getValue();
+        if (dir == null) return;
+        dir.setBody(bodyText.getText());
+        dir.setSubject(subjectText.getText());
+        dirsService.save(dir);
     }
 
     public void onReport(ActionEvent event) {
@@ -379,7 +383,21 @@ public class MainController implements Initializable {
         ReportHandler.showReports(reports);
     }
 
-    private void updateEmailsTable(List<String> emails) {
+    public void onDeleteDir(ActionEvent event) {
+        DirectoryStorage dir = dirChoiceBox.getValue();
+        if (dir == null) return;
+        AppData appData = appDataService.get();
+        appData.getDirs().remove(dir);
+        dirsService.delete(dir);
+        appData = appDataService.save(appData);
+        ObservableList<DirectoryStorage> items = dirChoiceBox.getItems();
+        items.clear();
+        items.addAll(appData.getDirs());
+        emailsTableView.getItems().clear();
+        filesTableView.getItems().clear();
+    }
+
+    private void updateEmailsTable(Set<String> emails) {
         List<TableEmailModel> emailModels = emails.stream().map(TableEmailModel::new).collect(Collectors.toList());
         ObservableList<TableEmailModel> items = emailsTableView.getItems();
         items.clear();
@@ -425,12 +443,6 @@ public class MainController implements Initializable {
             passwordVisibleText.setVisible(false);
             passwordText.setVisible(true);
         }
-    }
-
-    public void onClearAllData(ActionEvent actionEvent) {
-        filesTableView.getItems().clear();
-        subjectText.setText("");
-        bodyText.setText("");
     }
 
     public void onExitClicked(ActionEvent actionEvent) {

@@ -20,4 +20,7 @@ public class DirStorageService {
         return repo.save(dir);
     }
 
+    public void delete(DirectoryStorage dir) {
+        repo.delete(dir);
+    }
 }
