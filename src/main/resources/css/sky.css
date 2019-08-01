@@ -52,6 +52,19 @@
     -fx-background-image: url("../images/save.png");
 }
 
+.exitButton {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-repeat: no-repeat;
+    -fx-border-width: 0;
+    -fx-background-radius: 0;
+    -fx-background-size: 30 30;
+    -fx-background-position: center center;
+    -fx-min-width: 30;
+    -fx-min-height: 30;
+    -fx-background-image: url("../images/exit.png");
+}
+
 .addButton {
     -fx-background-color: transparent;
     -fx-border-color: transparent;

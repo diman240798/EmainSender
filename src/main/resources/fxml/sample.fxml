@@ -97,7 +97,7 @@
                     </image>
                 </ImageView>
                 <Label layoutX="65.0" layoutY="18.0" style="-fx-font-weight: bold;" styleClass="emailSenderLabel" text="Email Sender" />
-            <Button layoutX="1364.0" layoutY="2.0" mnemonicParsing="false" onAction="#onExitClicked" styleClass=".exitButton" text="Exit" />
+            <Button layoutX="1370.0" mnemonicParsing="false" onAction="#onExitClicked" styleClass="exitButton" />
             <ChoiceBox fx:id="dirChoiceBox" layoutX="400.0" layoutY="18.0" prefHeight="37.0" prefWidth="597.0" />
             </children>
         </Pane>
