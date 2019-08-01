@@ -2,6 +2,7 @@ package com.nanicky.emailsender.main;
 
 import com.nanicky.emailsender.Main;
 import com.nanicky.emailsender.main.handler.EmailHandler;
+import com.nanicky.emailsender.main.handler.ReportHandler;
 import com.nanicky.emailsender.main.handler.UIemailHandler;
 import com.nanicky.emailsender.model.*;
 import com.nanicky.emailsender.scheduler.MyTimer;
@@ -18,11 +19,15 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -180,6 +185,11 @@ public class MainController implements Initializable {
                 setTimeButton.setDisable(true);
             }
         });
+
+        ImageView folderImage = new ImageView("images/folder.png");
+        folderImage.setFitHeight(24);
+        folderImage.setFitWidth(30);
+        chooseDirButton.setGraphic(folderImage);
     }
 
     /*public void onChooseFileClicked(ActionEvent actionEvent) {
@@ -355,6 +365,18 @@ public class MainController implements Initializable {
     private void updateBodyAndSubject(DirectoryStorage directoryStorage) {
         bodyText.setText(directoryStorage.getBody());
         subjectText.setText(directoryStorage.getSubject());
+    }
+
+    public void onSaveBodySubject(ActionEvent event) {
+        DirectoryStorage value = dirChoiceBox.getValue();
+        value.setBody(bodyText.getText());
+        value.setSubject(subjectText.getText());
+        dirsService.save(value);
+    }
+
+    public void onReport(ActionEvent event) {
+        List<SendingReport> reports = reportService.getAll();
+        ReportHandler.showReports(reports);
     }
 
     private void updateEmailsTable(List<String> emails) {

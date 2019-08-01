@@ -39,6 +39,45 @@
     -fx-background-image: url("../images/clear_busket.png");
 }
 
+.saveButton {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-repeat: no-repeat;
+    -fx-border-width: 0;
+    -fx-background-radius: 0;
+    -fx-background-size: 30 30;
+    -fx-background-position: center center;
+    -fx-min-width: 30;
+    -fx-min-height: 30;
+    -fx-background-image: url("../images/save.png");
+}
+
+.addButton {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-repeat: no-repeat;
+    -fx-border-width: 0;
+    -fx-background-radius: 0;
+    -fx-background-size: 30 30;
+    -fx-background-position: center center;
+    -fx-min-width: 30;
+    -fx-min-height: 30;
+    -fx-background-image: url("../images/add.png");
+}
+
+.reportButton {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-repeat: no-repeat;
+    -fx-border-width: 0;
+    -fx-background-radius: 0;
+    -fx-background-size: 50 70;
+    -fx-background-position: center center;
+    -fx-min-width: 50;
+    -fx-min-height: 70;
+    -fx-background-image: url("../images/report.png");
+}
+
 .text-field {
     -fx-font-size: 10pt;
 }
