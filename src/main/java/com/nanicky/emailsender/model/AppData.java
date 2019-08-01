@@ -16,8 +16,8 @@ public class AppData {
 
     @OneToMany(targetEntity=DirectoryStorage.class, fetch=FetchType.EAGER, cascade=CascadeType.ALL)
     private List<DirectoryStorage> dirs;
-    @Column(name = "sendingTime")
-    private String sendingTime;
+    @Column(name = "sendingTime", nullable = false)
+    private String sendingTime = "";
 
     public AppData() {
         dirs = new ArrayList<>();

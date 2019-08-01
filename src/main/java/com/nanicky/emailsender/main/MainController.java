@@ -8,6 +8,7 @@ import com.nanicky.emailsender.scheduler.MyTimer;
 import com.nanicky.emailsender.scheduler.TimeUtil;
 import com.nanicky.emailsender.service.AppDataService;
 import com.nanicky.emailsender.service.DirStorageService;
+import com.nanicky.emailsender.service.SendingReportService;
 import com.nanicky.emailsender.service.UserDataService;
 import com.nanicky.emailsender.util.EmailValidator;
 import com.nanicky.emailsender.util.TimeValidator;
@@ -17,7 +18,6 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
@@ -28,6 +28,7 @@ import org.springframework.stereotype.Controller;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -42,6 +43,8 @@ public class MainController implements Initializable {
     private UserDataService userDataService;
     @Autowired
     private DirStorageService dirsService;
+    @Autowired
+    private SendingReportService reportService;
 
 
     @FXML
@@ -90,12 +93,17 @@ public class MainController implements Initializable {
     private Label timeElapsedLabel;
     @FXML
     private Button stopButton;
+    @FXML
+    private Button addEmailButton;
+    @FXML
+    private Label timeDescLabel;
+
 
     private MyTimer timer;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        timer = new MyTimer(timeElapsedLabel, this::sendMail);
+        timer = new MyTimer(timeElapsedLabel, this::sendMail, timeDescLabel);
         emailFromText.setOnKeyTyped(event -> {
             String email = emailFromText.getText();
             if (EmailValidator.validate(email)) {
@@ -110,8 +118,10 @@ public class MainController implements Initializable {
             String email = emailToText.getText();
             if (EmailValidator.validate(email)) {
                 incorrectEmailToLabel.setOpacity(0);
+                addEmailButton.setDisable(false);
             } else {
                 incorrectEmailToLabel.setOpacity(1);
+                addEmailButton.setDisable(true);
             }
         });
 
@@ -133,6 +143,7 @@ public class MainController implements Initializable {
 
         dirChoiceBox.setOnAction(event -> {
             DirectoryStorage value = dirChoiceBox.getValue();
+            emailToText.setDisable(false);
             setUI(value);
         });
 
@@ -141,7 +152,7 @@ public class MainController implements Initializable {
             List<DirectoryStorage> dirs = appData.getDirs();
             dirChoiceBox.getItems().addAll(dirs);
 
-            if (appData.getSendingTime() != null) {
+            if (appData.getSendingTime() != null && !appData.getSendingTime().isEmpty()) {
                 timeText.setText(appData.getSendingTime());
                 onSetTime(null);
             }
@@ -215,6 +226,9 @@ public class MainController implements Initializable {
         DirectoryStorage dir = dirChoiceBox.getValue();
         dir.getEmails().add(email);
         dirsService.save(dir);
+        emailToText.setText("");
+        addEmailButton.setDisable(true);
+        setUI(dir);
     }
 
     private void updateFilesTable(File dir) {
@@ -247,9 +261,10 @@ public class MainController implements Initializable {
     }
 
     private void sendMail() {
-        UIemailHandler.onStartSending(sendMailButton, errorLabel, sendingPane);
+        UIemailHandler.onStartSending(sendMailButton, errorLabel, sendingPane, setTimeButton, stopButton);
         new Thread(() -> {
             AtomicReference<String> errorText = new AtomicReference<>("");
+            List<SendingReport> reports = new ArrayList<>();
 
             try {
 
@@ -276,9 +291,14 @@ public class MainController implements Initializable {
 
                     List<String> emails = directoryStorage.getEmails();
                     for (int j = 0; j < emails.size(); j++) {
-                        String email = emails.get(j);
-                        EmailHandler emailHandler = new EmailHandler(userData, email, subject, body, files);
-                        emailHandler.sendMail();
+                        String emailTo = emails.get(j);
+                        try {
+                            EmailHandler emailHandler = new EmailHandler(userData, emailTo, subject, body, files);
+                            emailHandler.sendMail();
+                            reports.add(new SendingReport(emailTo, files));
+                        } catch (Exception e) {
+                            reports.add(new SendingReport(emailTo, files, e.getStackTrace().toString()));
+                        }
                     }
                 }
 
@@ -287,8 +307,10 @@ public class MainController implements Initializable {
                 errorText.set(e.getMessage());
                 e.printStackTrace();
             } finally {
+                reportService.save(reports);
                 Platform.runLater(() -> {
-                    UIemailHandler.onFinishSending(sendMailButton, errorLabel, errorText.get(), sendingPane);
+                    UIemailHandler.onFinishSending(sendMailButton, errorLabel, errorText.get(), sendingPane, setTimeButton, stopButton);
+                    onSetTime(null);
                 });
             }
         }).start();
@@ -307,15 +329,16 @@ public class MainController implements Initializable {
             appDataService.save(appData);
         }
         stopButton.setDisable(true);
-
-
+        timeDescLabel.setDisable(true);
     }
 
     public void onSetTime(ActionEvent event) {
+        AppData appData = appDataService.get();
+        if (appData == null)
+            return;
+
         setTimeButton.setDisable(true);
         String timeStr = timeText.getText();
-        AppData appData = appDataService.get();
-        if (appData == null) appData = new AppData();
         appData.setSendingTime(timeStr);
         appDataService.save(appData);
         int diffMinutes = (int) TimeUtil.getDiffMinutes(timeStr);
@@ -326,6 +349,12 @@ public class MainController implements Initializable {
     private void setUI(DirectoryStorage directoryStorage) {
         updateFilesTable(new File(directoryStorage.getPath()));
         updateEmailsTable(directoryStorage.getEmails());
+        updateBodyAndSubject(directoryStorage);
+    }
+
+    private void updateBodyAndSubject(DirectoryStorage directoryStorage) {
+        bodyText.setText(directoryStorage.getBody());
+        subjectText.setText(directoryStorage.getSubject());
     }
 
     private void updateEmailsTable(List<String> emails) {
@@ -338,10 +367,7 @@ public class MainController implements Initializable {
     public void onSaveUserDataClicked(ActionEvent actionEvent) {
         String emailFrom = emailFromText.getText();
         String password = showHidePassFLG.isSelected() ? passwordVisibleText.getText() : passwordText.getText();
-        UserData userData = userDataService.get();
-        userData.setEmail(emailFrom);
-        userData.setPassword(password);
-        userDataService.save(userData);
+        userDataService.save(emailFrom, password);
     }
 
     public void onClearEmailFrom(ActionEvent actionEvent) {

@@ -14,14 +14,17 @@ public class MyTimer {
     private int diffMinutes;
     private final Label timeElapsedLabel;
     private final Runnable callback;
+    private final Label timeDescLabel;
 
-    public MyTimer(Label timeElapsedLabel, Runnable callback) {
+    public MyTimer(Label timeElapsedLabel, Runnable callback, Label timeDescLabel) {
         this.timeElapsedLabel = timeElapsedLabel;
         this.callback = callback;
+        this.timeDescLabel = timeDescLabel;
     }
 
     public void setTimer(int diffMin) {
         this.diffMinutes = diffMin;
+        timeDescLabel.setDisable(false);
         // create task
         TimerTask task = new TimerTask() {
             public void run() {
@@ -33,9 +36,8 @@ public class MyTimer {
                     System.out.println("Minutes Left:" + diffMinutes);
                     diffMinutes--;
                 } else {
-                    System.out.println("Cancel Timer");
-                    timer.cancel();
-                    System.out.println("Running Callback");
+                    stop();
+                    System.out.println("Run Callback");
                     callback.run();
                 }
             }
@@ -45,8 +47,10 @@ public class MyTimer {
     }
 
     public void stop() {
-        timer.cancel();
+        System.out.println("Cancel Timer");
+        timeDescLabel.setDisable(true);
         timeElapsedLabel.setText("");
+        timer.cancel();
     }
 
     public boolean isRunning() {

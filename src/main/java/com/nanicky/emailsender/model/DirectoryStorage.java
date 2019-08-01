@@ -20,10 +20,10 @@ public class DirectoryStorage {
     @Column(name = "emails")
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> emails;
-    @Column(name = "body")
-    private String body;
-    @Column(name = "subject")
-    private String subject;
+    @Column(name = "body", nullable = false)
+    private String body = "";
+    @Column(name = "subject", nullable = false)
+    private String subject = "";
 
     public DirectoryStorage(String name, String path, List<String> emails) {
         this.name = name;
