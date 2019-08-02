@@ -57,7 +57,7 @@
                 <Label layoutX="155.0" layoutY="339.0" style="-fx-font-size: 10pt;" text="Сохранить сообщение и тему:" />
                 <!--clear all-->
                 <!--error handling-->
-                <Label fx:id="errorLabel" layoutY="604.0" prefHeight="72.0" prefWidth="400.0" style="-fx-text-fill: RED;" />
+                <Label fx:id="errorLabel" layoutY="604.0" prefHeight="72.0" prefWidth="400.0" style="-fx-text-fill: RED; -fx-font-size: 8pt;" />
                 <Pane fx:id="sendingPane" layoutY="678.0" prefHeight="62.0" prefWidth="401.0" visible="false">
                     <children>
                         <ImageView fitHeight="78.0" fitWidth="138.0" pickOnBounds="true" preserveRatio="true">

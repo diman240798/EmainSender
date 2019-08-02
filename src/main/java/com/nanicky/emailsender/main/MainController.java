@@ -231,14 +231,19 @@ public class MainController implements Initializable {
     public void onAddEmail(ActionEvent event) {
         String email = emailToText.getText();
         DirectoryStorage dir = dirChoiceBox.getValue();
-        dir = dirsService.findByPath(dir.getPath());
         if (dir == null) return;
-        Set<String> emails = dir.getEmails();
-        emails.add(email);
-        dirsService.save(dir);
-        emailToText.setText("");
-        addEmailButton.setDisable(true);
-        setUI(dir);
+        errorLabel.setText("");
+        try {
+            dir = dirsService.findByPath(dir.getPath());
+            Set<String> emails = dir.getEmails();
+            emails.add(email);
+            dirsService.save(dir);
+            emailToText.setText("");
+            addEmailButton.setDisable(true);
+            setUI(dir);
+        } catch (Exception e) {
+            errorLabel.setText(UtilStackTrace.getStackTrace(e));
+        }
     }
 
     private void updateFilesTable(File dir) {
