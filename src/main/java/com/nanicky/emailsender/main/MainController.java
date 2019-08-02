@@ -144,8 +144,14 @@ public class MainController implements Initializable {
         dirChoiceBox.setOnAction(event -> {
             DirectoryStorage dir = dirChoiceBox.getValue();
             if (dir == null) return;
-            emailToText.setDisable(false);
-            setUI(dir);
+            errorLabel.setText("");
+            try {
+                dirsService.findByPath(dir.getPath());
+                emailToText.setDisable(false);
+                setUI(dir);
+            } catch (Exception e) {
+                errorLabel.setText(UtilStackTrace.getStackTrace(e));
+            }
         });
 
         AppData appData = appDataService.get();
@@ -264,11 +270,12 @@ public class MainController implements Initializable {
         if (keyEvent.getCode() == KeyCode.DELETE) {
             TableEmailModel selectedItem = emailsTableView.getSelectionModel().getSelectedItem();
             if (selectedItem == null) return;
-            DirectoryStorage curentDir = dirChoiceBox.getValue();
-            Set<String> emails = curentDir.getEmails();
+            DirectoryStorage dir = dirChoiceBox.getValue();
+            dir = dirsService.findByPath(dir.getPath());
+            Set<String> emails = dir.getEmails();
             emails.remove(selectedItem.getEmail());
-            dirsService.save(curentDir);
-            setUI(curentDir);
+            dirsService.save(dir);
+            setUI(dir);
         }
     }
 
