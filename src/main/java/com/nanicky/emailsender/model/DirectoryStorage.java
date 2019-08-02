@@ -22,7 +22,7 @@ public class DirectoryStorage {
 
     @Column(name = "name")
     private String name;
-    @Column(name = "path")
+    @Column(name = "path", unique = true)
     private String path;
     @Column(name = "emails")
     @ElementCollection(fetch = FetchType.EAGER)

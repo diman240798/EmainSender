@@ -231,6 +231,7 @@ public class MainController implements Initializable {
     public void onAddEmail(ActionEvent event) {
         String email = emailToText.getText();
         DirectoryStorage dir = dirChoiceBox.getValue();
+        dir = dirsService.findByPath(dir.getPath());
         if (dir == null) return;
         Set<String> emails = dir.getEmails();
         emails.add(email);
