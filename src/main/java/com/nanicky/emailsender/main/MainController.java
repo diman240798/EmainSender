@@ -351,7 +351,7 @@ public class MainController implements Initializable {
         timeText.setText("");
         AppData appData = appDataService.get();
         if (appData != null) {
-            appData.setSendingTime(null);
+            appData.setSendingTime("");
             appDataService.save(appData);
         }
         stopButton.setDisable(true);
@@ -360,7 +360,7 @@ public class MainController implements Initializable {
 
     public void onSetTime(ActionEvent event) {
         AppData appData = appDataService.get();
-        if (appData == null || appData.getSendingTime() == null || appData.getSendingTime().isEmpty())
+        if (appData == null)
             return;
 
 
