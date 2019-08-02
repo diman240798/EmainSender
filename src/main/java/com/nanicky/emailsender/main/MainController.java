@@ -354,6 +354,7 @@ public class MainController implements Initializable {
             appData.setSendingTime("");
             appDataService.save(appData);
         }
+        timeText.setDisable(false);
         stopButton.setDisable(true);
         timeDescLabel.setDisable(true);
     }
@@ -365,6 +366,7 @@ public class MainController implements Initializable {
 
 
         setTimeButton.setDisable(true);
+        timeText.setDisable(true);
         String timeStr = timeText.getText();
         appData.setSendingTime(timeStr);
         appDataService.save(appData);

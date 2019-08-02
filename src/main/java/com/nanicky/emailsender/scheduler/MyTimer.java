@@ -10,7 +10,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class MyTimer {
-    private Timer timer = new Timer();
+    private Timer timer;
     private int diffMinutes;
     private final Label timeElapsedLabel;
     private final Runnable callback;
@@ -23,6 +23,7 @@ public class MyTimer {
     }
 
     public void setTimer(int diffMin) {
+         timer = new Timer();
         this.diffMinutes = diffMin;
         timeDescLabel.setDisable(false);
         // create task
@@ -51,6 +52,7 @@ public class MyTimer {
         timeDescLabel.setDisable(true);
         timeElapsedLabel.setText("");
         timer.cancel();
+        timer = null;
     }
 
     public boolean isRunning() {
