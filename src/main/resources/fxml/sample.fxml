@@ -28,7 +28,7 @@
                 <TextField fx:id="emailToText" disable="true" layoutX="135.0" layoutY="270.0" prefHeight="30.0" prefWidth="202.0" promptText="EmailTo:" />
                 <Button fx:id="chooseDirButton" layoutX="20.0" layoutY="222.0" maxHeight="34.0" maxWidth="360.0" mnemonicParsing="false" onAction="#onChooseDirClicked" prefHeight="34.0" prefWidth="360.0" text="Добавить каталог" />
                 <Label fx:id="incorrectEmailFromLabel" layoutX="160.0" layoutY="26.0" opacity="0" style="-fx-font-size: 9pt; -fx-text-fill: #ff1000; -fx-font-weight: bold" text="некорректный email" />
-                <Label fx:id="incorrectEmailToLabel" layoutX="160.0" layoutY="205.0" opacity="0" style="-fx-font-size: 9pt; -fx-text-fill: #ff1000; -fx-font-weight: bold" text="некорректный email" />
+                <Label fx:id="incorrectEmailToLabel" layoutX="176.0" layoutY="301.0" opacity="0" style="-fx-font-size: 9pt; -fx-text-fill: #ff1000; -fx-font-weight: bold" text="некорректный email" />
 
 
                 <Button layoutX="358.0" layoutY="49.0" mnemonicParsing="false" onAction="#onClearEmailFrom" styleClass="clearButton" />
