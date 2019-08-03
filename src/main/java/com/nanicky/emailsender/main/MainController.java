@@ -336,7 +336,6 @@ public class MainController implements Initializable {
                 reportService.save(reports);
                 Platform.runLater(() -> {
                     UIemailHandler.onFinishSending(sendMailButton, errorLabel, errorText.get(), sendingPane, setTimeButton, stopButton);
-                    onSetTime(null);
                 });
             }
         }).start();
