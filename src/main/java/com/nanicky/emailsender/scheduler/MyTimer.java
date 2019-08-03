@@ -52,8 +52,10 @@ public class MyTimer {
         timer.cancel();
         timer = null;
         System.out.println("Cancel Timer");
-        timeDescLabel.setDisable(true);
-        timeElapsedLabel.setText("");
+        Platform.runLater(() -> {
+            timeDescLabel.setDisable(true);
+            timeElapsedLabel.setText("");
+        });
         diffMinutes = 0;
     }
 
