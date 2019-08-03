@@ -48,11 +48,12 @@ public class MyTimer {
     }
 
     public void stop() {
+        timer.cancel();
+        timer = null;
         System.out.println("Cancel Timer");
         timeDescLabel.setDisable(true);
         timeElapsedLabel.setText("");
-        timer.cancel();
-        timer = null;
+        diffMinutes = 0;
     }
 
     public boolean isRunning() {
