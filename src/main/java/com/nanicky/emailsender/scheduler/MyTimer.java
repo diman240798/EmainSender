@@ -48,6 +48,7 @@ public class MyTimer {
     }
 
     public void stop() {
+        if (timer == null) return;
         timer.cancel();
         timer = null;
         System.out.println("Cancel Timer");
